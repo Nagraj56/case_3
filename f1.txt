@@ -1,1 +1,50 @@
-this is third case by first developer
+
+---
+- hosts: ansiblehost
+  tasks:
+  - name: create docker image
+    command: docker build -t hello_img:latest .
+    args:
+     chdir: /opt/docker
+
+
+
+
+---
+- hosts: ansiblehost
+  tasks:
+  - name: create docker image
+    command: docker build -t hello_img:latest .
+    args:
+     chdir: /opt/docker
+  - name: create tag to push image onto DockerHub
+    command: docker tag hello_img:latest y21acs487/hello_img:latest
+  - name: Push image onto DockerHub
+    command: docker push y21acs487/hello_img:latest
+
+
+
+
+---
+- hosts: dockerhost
+  tasks:
+    - name: create a container using DockerHub image
+      command: docker run -d --name hello-server -p 8084:8080 y21acs487/hello_img:latest
+
+
+
+
+---
+- hosts: dockerhost
+  tasks:
+    - name: to stop container
+      command: docker stop hello-server
+      ignore_errors: yes
+    - name: to remove container
+      command: docker rm hello-server
+      ignore_errors: yes
+    - name: to remove images
+      command: docker rmi y21acs487/hello_img:latest
+      ignore_errors: yes
+    - name: create a container using DockerHub image
+      command: docker run -d --name hello-server -p 8084:8080 y21acs487/hello_img:latest
